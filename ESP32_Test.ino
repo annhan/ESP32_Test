@@ -1,10 +1,11 @@
-/*
- *  This sketch shows the WiFi event usage
- *
- */
-#include <Preferences.h>
 
+#include <Preferences.h>
+#include <NHAN_ESP32WebServer.h>
 #include <WiFi.h>
+#include "Variable_html.h"
+
+
+
 
 const char* ssid     = "mHomeRD_B";
 const char* password = "123789456";
@@ -13,6 +14,8 @@ IPAddress ip10;
 IPAddress gateway10;
 IPAddress subnet10;
 IPAddress DNS(8, 8, 8, 8);
+
+ESP8266WebServer server(4999);
 
 Preferences preferences;
 struct WiFiConfStruct {
@@ -57,13 +60,13 @@ void setup()
     WiFi.begin(ssid, password);
     Serial.println();
     Serial.println("Wait for WiFi... ");
+    setupWeb();
+  setupWiFiConf();
+  server.begin();
 }
-
 
 void loop()
-{
+{   server.handleClient();
     delay(1000);
 }
-
-
 
