@@ -1,6 +1,6 @@
 
 #include <Preferences.h>
-#include <NHAN_ESP32WebServer.h>
+#include <N_ESP32WEBSERVER.h>
 #include <WiFi.h>
 #include "Variable_html.h"
 
@@ -15,7 +15,7 @@ IPAddress gateway10;
 IPAddress subnet10;
 IPAddress DNS(8, 8, 8, 8);
 
-ESP8266WebServer server(4999);
+N_ESP32WEBSERVER server(4999);
 
 Preferences preferences;
 struct WiFiConfStruct {
