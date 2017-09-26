@@ -1,4 +1,4 @@
-bool loadWiFiConf() {
+/*bool loadWiFiConf() {
   preferences.begin("wifi", false);
   Serial.println(F("loading WiFiConf"));
   WiFiConf.sta_ssid=preferences.getString("ssid","none");
@@ -25,18 +25,34 @@ void saveWiFiConf(void) {
   preferences.putString("gateway",WiFiConf.sta_gateway);
   preferences.putString("subnet",WiFiConf.sta_subnet);
   preferences.end();
+}*/
+void printWiFiConf(void) {
+  //Serial.println(WiFiConf.sta_ssid);
 }
-
-void parseBytes1(const char* str, char sep, int address, int maxBytes, int base) {
-  for (int i = 0; i < maxBytes; i++) {
-    if (address == 1) ip10[i] = strtoul(str, NULL, base);  // Convert byte
-    else if (address == 2) gateway10[i] = strtoul(str, NULL, base);  // Convert byte
-    else if (address == 3) subnet10[i] = strtoul(str, NULL, base);  // Convert byte
-    Serial.println(ip10[i]);
-    str = strchr(str, sep);               // Find next separator
-    if (str == NULL || *str == '\0') {
-      break;                            // No more separators, exit
+bool loadWiFiConf() {
+  //Serial.println(F("loading WiFiConf"));
+  if (EEPROM.read(WIFI_CONF_START + 0) == wifi_conf_format[0] &&
+      EEPROM.read(WIFI_CONF_START + 1) == wifi_conf_format[1] &&
+      EEPROM.read(WIFI_CONF_START + 2) == wifi_conf_format[2] &&
+      EEPROM.read(WIFI_CONF_START + 3) == wifi_conf_format[3])
+  {
+    for (unsigned int t = 0; t < sizeof(WiFiConf); t++) {
+      *((char*)&WiFiConf + t) = EEPROM.read(WIFI_CONF_START + t); //& là địa chỉ  của biến Struc, *là data tức là gán data trong ô nhớ struc bằng eprom đọc dc (char*) là ép kiểu dữ liệu
     }
-    str++;                                // Point to next character after separator
+    printWiFiConf();
+    return true;
+  } else {
+    return false;
   }
 }
+void saveWiFiConf(void) {
+  for (unsigned int t = 0; t < sizeof(WiFiConf); t++) {
+    EEPROM.write(WIFI_CONF_START + t, *((char*)&WiFiConf + t));
+  }
+  EEPROM.commit();
+  printWiFiConf();
+}
+
+
+
+

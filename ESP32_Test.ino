@@ -1,72 +1,30 @@
-
-#include <Preferences.h>
+#include "EEPROM.h"
 #include <N_ESP32WEBSERVER.h>
 #include <WiFi.h>
 #include "Variable_html.h"
-
-
-
-
-const char* ssid     = "mHomeRD_B";
-const char* password = "123789456";
-
-IPAddress ip10;
-IPAddress gateway10;
-IPAddress subnet10;
-IPAddress DNS(8, 8, 8, 8);
-
+#include "Variable_wifi.h"
+#include <ESP32HTTPUpdateServer.h>
 N_ESP32WEBSERVER server(4999);
-
-Preferences preferences;
-struct WiFiConfStruct {
-  String sta_ssid;
-  String sta_pwd;
-  String sta_ip;
-  String sta_gateway;
-  String sta_subnet;
-} WiFiConf = {
-  "hghg",
-  "",
-  "192.168.1.240",
-  "192.168.1.1",
-  "255.255.255.0"
-};
-
-void WiFiEvent(WiFiEvent_t event)
-{
-    Serial.printf("[WiFi-event] event: %d\n", event);
-
-    switch(event) {
-    case SYSTEM_EVENT_STA_GOT_IP:
-        Serial.println("WiFi connected");
-        Serial.println("IP address: ");
-        Serial.println(WiFi.localIP());
-        break;
-    case SYSTEM_EVENT_STA_DISCONNECTED:
-        Serial.println("WiFi lost connection");
-        break;
-    }
-}
-
-
+ESP32HTTPUpdateServer httpUpdater;
+const char* update_path = "/firmware";
+const char* update_username = "mhome";
+const char* update_password = "fibaro";
 void setup()
 {
     Serial.begin(115200);
+    Serial.println("Begin");
+    EEPROM.begin(1024);
     WiFi.disconnect(true);
     loadWiFiConf();
-    delay(1000);
-    WiFi.onEvent(WiFiEvent);
-    WiFi.mode(WIFI_AP_STA);
-    WiFi.begin(ssid, password);
-    Serial.println();
-    Serial.println("Wait for WiFi... ");
+    wifi_staticip(WiFiConf.sta_ip,WiFiConf.sta_gateway,WiFiConf.sta_subnet);   
+    wifi_connect(WIFI_AP_STA,WiFiConf.sta_ssid,WiFiConf.sta_pwd,WiFiConf.ap_ssid);
+    httpUpdater.setup(&server, update_path, update_username, update_password);
     setupWeb();
-  setupWiFiConf();
-  server.begin();
+    setupWiFiConf();
+    server.begin();
 }
 
 void loop()
 {   server.handleClient();
-    delay(1000);
 }
 
